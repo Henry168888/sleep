@@ -127,3 +127,6 @@ flask_thread.start()
 # 您可能需要手動停止執行
 while True:
     time.sleep(1)
+git add requirements.txt
+git commit -m "add requirements.txt"
+git push
