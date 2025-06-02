@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>睡眠時數計算器</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+        h1 { color: #333; }
+        form { margin-bottom: 20px; }
+        input, button { padding: 8px; margin: 5px 0; width: 100%; }
+        .message { color: green; }
+        .error { color: red; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>睡眠時數計算器</h1>
+    {% if message %}
+        <p class="{{ 'error' if '⚠️' in message else 'message' }}">{{ message }}</p>
+    {% endif %}
+    <form method="post">
+        <label>日期：<input type="date" name="date" required></label><br>
+        <label>就寢時間（HH:MM）：<input type="time" name="start_time" required></label><br>
+        <label>起床時間（HH:MM）：<input type="time" name="end_time" required></label><br>
+        <button type="submit">送出</button>
+    </form>
+
+    <h2>睡眠紀錄</h2>
+    <table>
+        <tr>
+            <th>日期</th>
+            <th>就寢</th>
+            <th>起床</th>
+            <th>睡眠時數</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record['日期'] }}</td>
+            <td>{{ record['就寢'] }}</td>
+            <td>{{ record['起床'] }}</td>
+            <td>{{ record['睡眠時數'] }} 小時</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
