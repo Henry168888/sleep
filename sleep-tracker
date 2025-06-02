@@ -1,0 +1,97 @@
+sleep-tracker/
+├── app.py
+├── requirements.txt
+├── Procfile
+└── templates/
+    └── index.html
+from flask import Flask, render_template, request
+from datetime import datetime, timedelta
+
+app = Flask(__name__)
+sleep_records = []
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    message = None
+    if request.method == 'POST':
+        date = request.form['date']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+
+        try:
+            fmt = "%H:%M"
+            start = datetime.strptime(start_time, fmt)
+            end = datetime.strptime(end_time, fmt)
+
+            if end < start:
+                end += timedelta(days=1)
+
+            duration = end - start
+            hours = round(duration.total_seconds() / 3600, 2)
+
+            sleep_records.append({
+                "日期": date,
+                "就寢": start_time,
+                "起床": end_time,
+                "睡眠時數": hours
+            })
+
+            message = f"✅ 你在 {date} 睡了 {hours} 小時。"
+
+        except:
+            message = "⚠️ 請確認時間格式正確（如 23:00 和 07:30）"
+
+    return render_template('index.html', records=sleep_records, message=message)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+flask
+gunicorn
+web: gunicorn app:app
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>睡眠時數計算器</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; }
+        h1 { color: #333; }
+        form { margin-bottom: 20px; }
+        input, button { padding: 8px; margin: 5px 0; width: 100%; }
+        .message { color: green; }
+        .error { color: red; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>睡眠時數計算器</h1>
+    {% if message %}
+        <p class="{{ 'error' if '⚠️' in message else 'message' }}">{{ message }}</p>
+    {% endif %}
+    <form method="post">
+        <label>日期：<input type="date" name="date" required></label><br>
+        <label>就寢時間（HH:MM）：<input type="time" name="start_time" required></label><br>
+        <label>起床時間（HH:MM）：<input type="time" name="end_time" required></label><br>
+        <button type="submit">送出</button>
+    </form>
+
+    <h2>睡眠紀錄</h2>
+    <table>
+        <tr>
+            <th>日期</th>
+            <th>就寢</th>
+            <th>起床</th>
+            <th>睡眠時數</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record['日期'] }}</td>
+            <td>{{ record['就寢'] }}</td>
+            <td>{{ record['起床'] }}</td>
+            <td>{{ record['睡眠時數'] }} 小時</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
