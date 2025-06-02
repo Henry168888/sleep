@@ -1,0 +1,41 @@
+from flask import Flask, render_template, request
+from datetime import datetime, timedelta
+
+app = Flask(__name__)
+sleep_records = []
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    message = None
+    if request.method == 'POST':
+        date = request.form['date']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+
+        try:
+            fmt = "%H:%M"
+            start = datetime.strptime(start_time, fmt)
+            end = datetime.strptime(end_time, fmt)
+
+            if end < start:
+                end += timedelta(days=1)
+
+            duration = end - start
+            hours = round(duration.total_seconds() / 3600, 2)
+
+            sleep_records.append({
+                "日期": date,
+                "就寢": start_time,
+                "起床": end_time,
+                "睡眠時數": hours
+            })
+
+            message = f"✅ 你在 {date} 睡了 {hours} 小時。"
+
+        except:
+            message = "⚠️ 請確認時間格式正確（如 23:00 和 07:30）"
+
+    return render_template('index.html', records=sleep_records, message=message)
+
+if __name__ == '__main__':
+    app.run(debug=True)
